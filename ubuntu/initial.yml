@@ -35,6 +35,9 @@
         state: present
         update_cache: true
 
+    - name: Create /etc/docker directory
+      shell: mkdir /etc/docker
+
     - name: Setup Docker Daemon
       shell: |
         cat > /etc/docker/daemon.json <<EOF
@@ -52,7 +55,7 @@
         EOF
 
     - name: Make directroy for docker systemd 
-      shell: "mkdir -p /etc/systemd/system/docker.service.d"
+      shell: mkdir -p /etc/systemd/system/docker.service.d
   
     - name: Enabled docker
       systemd:

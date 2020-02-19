@@ -5,16 +5,6 @@
     - name: Disable Swap
       shell: swapoff -a
 
-    - name: Add Docker registry
-      shell: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
-
-    - name: Install Docker container runtime
-      yum:
-        name: 
-          - docker-ce-19.03.4
-        state: present
-        update_cache: true
-
     - name: Install Docker dependencies
       yum:
         name:
@@ -24,12 +14,28 @@
         state: present
         update_cache: true
 
+    - name: Add Docker registry
+      shell: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+
+    - name: Install Docker container runtime
+      yum:
+        name: 
+          - docker-ce-19.03.4
+          - docker-ce-cli-19.03.4
+          - containerd.io-1.2.10
+        state: present
+        update_cache: true
+
     - name: Install other required packages
       yum: 
         name:
           - epel-release
           - python3
+          - curl 
         state: present
+
+    - name: Create /etc/docker directory
+      shell: mkdir /etc/docker
 
     - name: Setup Docker Daemon
       shell: |
@@ -48,7 +54,7 @@
         EOF
 
     - name: Make directroy for docker systemd 
-      shell: "mkdir -p /etc/systemd/system/docker.service.d"
+      shell: mkdir -p /etc/systemd/system/docker.service.d
   
     - name: Enabled docker
       systemd:
