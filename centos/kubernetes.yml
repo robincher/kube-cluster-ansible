@@ -1,0 +1,42 @@
+- hosts: all
+  become: yes
+  tasks:
+    - name: Add Kubernetes repo
+      shell: |
+        cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+        [kubernetes]
+        name=Kubernetes
+        baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+        enabled=1
+        gpgcheck=1
+        repo_gpgcheck=1
+        gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+        EOF
+      
+    - name: Set SELINUX to permissive
+      shell: setenforce 0 && sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+    - name: Install Kubelet and Kubeadmn for all nodes
+      yum:
+        name: 
+          - kubelet
+          - kubeadm
+        disable_excludes: kubernetes
+        state: present
+        update_cache: true
+
+    - name: Enable kubelet
+      systemd:
+        name: kubelet
+        state: started
+        enabled: yes
+
+- hosts: master
+  become: yes
+  tasks:
+   - name: Install kubectl for Master node
+     yum:
+       name:
+         - kubectl
+       disable_excludes: kubernetes
+       state: present

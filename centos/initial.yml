@@ -1,0 +1,62 @@
+- hosts: all
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Disable Swap
+      shell: swapoff -a
+
+    - name: Add Docker registry
+      shell: "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
+
+    - name: Install Docker container runtime
+      yum:
+        name: 
+          - docker-ce-19.03.4
+        state: present
+        update_cache: true
+
+    - name: Install Docker dependencies
+      yum:
+        name:
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+        state: present
+        update_cache: true
+
+    - name: Install other required packages
+      yum: 
+        name:
+          - epel-release
+          - python3
+        state: present
+
+    - name: Setup Docker Daemon
+      shell: |
+        cat > /etc/docker/daemon.json <<EOF
+        {
+          "exec-opts": ["native.cgroupdriver=systemd"],
+          "log-driver": "json-file",
+          "log-opts": {
+            "max-size": "100m"
+          },
+          "storage-driver": "overlay2",
+          "storage-opts": [
+            "overlay2.override_kernel_check=true"
+          ]
+        }
+        EOF
+
+    - name: Make directroy for docker systemd 
+      shell: "mkdir -p /etc/systemd/system/docker.service.d"
+  
+    - name: Enabled docker
+      systemd:
+        name: docker 
+        enabled: yes
+        
+    - name: Restart docker
+      systemd:
+        state: restarted
+        daemon_reload: yes
+        name: docker 
