@@ -1,0 +1,18 @@
+- hosts: master
+  become: yes
+  tasks:
+    - name: Create tmp folder
+      shell: mkdir tmp && cd tmp
+
+    - name: Pull helm installation script
+      shell:  curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 > install-helm.sh
+
+    - name: Changing permission of "install-helm.sh", adding "+x"
+      file: dest=install-helm.sh mode=a+x
+
+    - name: Start helm installation
+      shell: ./install-helm.sh
+
+    - name:  Add stable helm repo
+      shell: helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+      
