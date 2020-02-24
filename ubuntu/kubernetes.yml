@@ -23,11 +23,4 @@
        name: kubeadm
        state: present
 
-- hosts: master
-  become: yes
-  tasks:
-   - name: Install kubectl
-     apt:
-       name: kubectl
-       state: present
-       force: yes
+

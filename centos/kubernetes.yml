@@ -31,12 +31,3 @@
         state: started
         enabled: yes
 
-- hosts: master
-  become: yes
-  tasks:
-   - name: Install kubectl for Master node
-     yum:
-       name:
-         - kubectl
-       disable_excludes: kubernetes
-       state: present

@@ -3,3 +3,6 @@ hosts
 
 # Other
 *.retry
+
+# Config
+ansible.cfg

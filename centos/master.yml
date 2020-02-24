@@ -1,6 +1,13 @@
 - hosts: master
   become: yes
   tasks:
+    - name: Install kubectl for Master node
+      yum:
+        name:
+          - kubectl
+        disable_excludes: kubernetes
+        state: present
+
     - name: Initialize the cluster
       shell: kubeadm init --pod-network-cidr=10.244.0.0/16 >> cluster_initialized.txt
       args:
