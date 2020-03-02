@@ -36,3 +36,4 @@ ansible-playbook -i inventory/hosts workers.yml
 
 ## Acknowledgments
 * [k8 cluster with Ansible](https://www.digitalocean.com/community/tutorials/how-to-create-a-kubernetes-cluster-using-kubeadm-on-ubuntu-18-04/) - How To Create a Kubernetes Cluster Using Kubeadm on Ubuntu 18.04
+* [Kubernetes Networking](https://github.com/coreos/coreos-kubernetes/blob/master/Documentation/kubernetes-networking.md) - Kubernetes networking during set-up
