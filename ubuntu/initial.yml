@@ -2,12 +2,12 @@
   become: yes
   gather_facts: false
   tasks:
-    - name: Disable Swap 
+    - name: Disable Swap
       shell: swapoff -a
 
     - name: Install required packages
       apt:
-        name: 
+        name:
           - apt-transport-https
           - curl
           - ca-certificates
@@ -15,16 +15,16 @@
           - gnupg2
         state: present
         update_cache: yes
-    
+
     - name: Add docker official GPG Key
       shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
     - name: Add Docker app repository
       shell: |
-            add-apt-repository \
-            "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-            $(lsb_release -cs) \
-            stable"
+        add-apt-repository \
+        "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+        $(lsb_release -cs) \
+        stable"
 
     - name: Install Docker dependencies
       apt:
@@ -54,16 +54,30 @@
         }
         EOF
 
-    - name: Make directroy for docker systemd 
+    - name: Make directroy for docker systemd
       shell: mkdir -p /etc/systemd/system/docker.service.d
-  
+
     - name: Enabled docker
       systemd:
-        name: docker 
+        name: docker
         enabled: yes
-        
+
+    - name: Enable br_netfitter module
+      shell: modprobe br_netfilter
+
+    - name: Letting iptables see bridged traffic
+      shell: |
+        cat > /etc/sysctl.d/99-kubernetes-cri.conf <<EOF
+        net.bridge.bridge-nf-call-iptables  = 1
+        net.ipv4.ip_forward                 = 1
+        net.bridge.bridge-nf-call-ip6tables = 1
+        EOF
+
+    - name: Refresh sysctl config variables
+      shell: sysctl --system
+
     - name: Restart docker
       systemd:
         state: restarted
         daemon_reload: yes
-        name: docker 
+        name: docker

@@ -19,7 +19,7 @@
 
     - name: Install Docker container runtime
       yum:
-        name: 
+        name:
           - docker-ce-19.03.4
           - docker-ce-cli-19.03.4
           - containerd.io-1.2.10
@@ -27,11 +27,12 @@
         update_cache: true
 
     - name: Install other required packages
-      yum: 
+      yum:
         name:
           - epel-release
           - python3
-          - curl 
+          - curl
+          - telnet
         state: present
 
     - name: Create /etc/docker directory
@@ -53,16 +54,30 @@
         }
         EOF
 
-    - name: Make directroy for docker systemd 
+    - name: Make directroy for docker systemd
       shell: mkdir -p /etc/systemd/system/docker.service.d
-  
+
     - name: Enabled docker
       systemd:
-        name: docker 
+        name: docker
         enabled: yes
-        
+
+    - name: Enable br_netfitter module
+      shell: modprobe br_netfilter
+
+    - name: Letting iptables see bridged traffic
+      shell: |
+        cat > /etc/sysctl.d/99-kubernetes-cri.conf <<EOF
+        net.bridge.bridge-nf-call-iptables  = 1
+        net.ipv4.ip_forward                 = 1
+        net.bridge.bridge-nf-call-ip6tables = 1
+        EOF
+
+    - name: Refresh sysctl config variables
+      shell: sysctl --system
+
     - name: Restart docker
       systemd:
         state: restarted
         daemon_reload: yes
-        name: docker 
+        name: docker
